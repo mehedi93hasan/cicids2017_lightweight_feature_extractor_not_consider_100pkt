@@ -21,27 +21,27 @@ jobs:
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pyinstaller customtkinter scapy numpy pandas pillow python-docx
+        pip install pyinstaller customtkinter scapy numpy pandas pillow
     
-    - name: Build EXE with Console (for debugging)
+    - name: Build EXE
       run: |
-        pyinstaller --noconfirm --onefile --console --name "CICIDS2017_Feature_Extractor" --collect-all customtkinter --hidden-import=PIL._tkinter_finder cicids2017_lightweight_feature_extractor.py
+        pyinstaller --noconfirm --onefile --windowed --name "CICIDS2017_Extractor" --collect-all customtkinter --hidden-import=PIL._tkinter_finder main.py
       shell: pwsh
     
     - name: Verify Build
       run: |
-        if (Test-Path "dist/CICIDS2017_Feature_Extractor.exe") {
+        if (Test-Path "dist/CICIDS2017_Extractor.exe") {
           Write-Host "✓ Build successful!"
-          $size = (Get-Item "dist/CICIDS2017_Feature_Extractor.exe").Length / 1MB
+          $size = (Get-Item "dist/CICIDS2017_Extractor.exe").Length / 1MB
           Write-Host "EXE Size: $([math]::Round($size, 2)) MB"
         } else {
-          Write-Host "❌ Build failed - EXE not found"
+          Write-Host "❌ Build failed"
           exit 1
         }
       shell: pwsh
     
-    - name: Upload Artifact
+    - name: Upload EXE
       uses: actions/upload-artifact@v4
       with:
         name: CICIDS2017-Feature-Extractor
-        path: dist/CICIDS2017_Feature_Extractor.exe
+        path: dist/CICIDS2017_Extractor.exe
