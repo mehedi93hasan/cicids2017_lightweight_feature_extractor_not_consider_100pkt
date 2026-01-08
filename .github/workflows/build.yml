@@ -1,1 +1,47 @@
+name: Build CICIDS2017 Feature Extractor EXE
 
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pyinstaller customtkinter scapy numpy pandas pillow python-docx
+    
+    - name: Build EXE with Console (for debugging)
+      run: |
+        pyinstaller --noconfirm --onefile --console --name "CICIDS2017_Feature_Extractor" --collect-all customtkinter --hidden-import=PIL._tkinter_finder cicids2017_lightweight_feature_extractor.py
+      shell: pwsh
+    
+    - name: Verify Build
+      run: |
+        if (Test-Path "dist/CICIDS2017_Feature_Extractor.exe") {
+          Write-Host "✓ Build successful!"
+          $size = (Get-Item "dist/CICIDS2017_Feature_Extractor.exe").Length / 1MB
+          Write-Host "EXE Size: $([math]::Round($size, 2)) MB"
+        } else {
+          Write-Host "❌ Build failed - EXE not found"
+          exit 1
+        }
+      shell: pwsh
+    
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: CICIDS2017-Feature-Extractor
+        path: dist/CICIDS2017_Feature_Extractor.exe
